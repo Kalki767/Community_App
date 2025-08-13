@@ -5,14 +5,14 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main", "backend.main"]
+    branches: [ "main", "Backend.main"]
     paths:
-      - 'backend/services/auth_service/**'
+      - 'Backend/services/auth_service/**'
       - '.github/workflows/authservice.yml'
   pull_request:
-    branches: [ "main" , "backend.main"]
+    branches: [ "main" , "Backend.main"]
     paths:
-      - 'backend/services/auth_service/**'
+      - 'Backend/services/auth_service/**'
       - '.github/workflows/authservice.yml'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/services/auth_service
+        working-directory: Backend/services/auth_service
     steps:
       - uses: actions/checkout@v3
 
