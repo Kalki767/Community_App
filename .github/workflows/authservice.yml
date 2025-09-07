@@ -14,8 +14,12 @@ on:
     paths:
       - 'Backend/services/auth_service/**'
       - '.github/workflows/authservice.yml'
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+env:
+  ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
+  REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  REDIS_URL: ${{ secrets.REDIS_URL }}
+ 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
