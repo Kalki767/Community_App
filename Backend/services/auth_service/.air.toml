@@ -1,0 +1,17 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ./cmd/main.go"
+  bin = "./tmp/main"
+  full_bin = ""
+  exclude_dir = ["tmp", "vendor", "bin"]
+  exclude_file = []
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = false
+  log = "build-errors.log"
+  delay = 500 # ms
+  stop_on_error = true
+
+[log]
+  time = false

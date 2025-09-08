@@ -1,23 +1,34 @@
-#Base image
-FROM golang:1.23-alpine
+# Use a multi-stage build to keep the final image small
+# Stage 1: The builder stage
+FROM golang:1.25-alpine AS builder
 
-#Set workdir inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-#copy the dependencies for efficiency
+# Install Air for hot-reloading
+RUN go install github.com/air-verse/air@latest
+
+# Copy Go module files to cache dependencies
 COPY go.mod go.sum ./
 
-#install the dependencies
+# Download all project dependencies
 RUN go mod download
 
-#copy the full code
+# Copy the rest of the application source code
 COPY . .
 
-#build the binary
-RUN go build -o auth_service ./cmd/main.go
+# Build the binary to ensure dependencies are resolved
+RUN go build -o /tmp/auth_service ./cmd/main.go
 
-#Expose the port the service runs on
-EXPOSE 8080
+# Stage 2: The final runtime image
+FROM golang:1.25-alpine
 
-#Command to run the service
-CMD ["./auth_service"]
+# Copy the Air binary and the application source code from the builder stage
+COPY --from=builder /go/bin/air /usr/local/bin/air
+COPY --from=builder /app /app
+
+# Set the working directory
+WORKDIR /app
+
+# Set Air as the entrypoint for hot-reloading
+ENTRYPOINT ["air"]
