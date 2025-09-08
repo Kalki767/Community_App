@@ -1,6 +1,6 @@
 # Use a multi-stage build to keep the final image small
 # Stage 1: The builder stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -21,7 +21,7 @@ COPY . .
 RUN go build -o /tmp/auth_service ./cmd/main.go
 
 # Stage 2: The final runtime image
-FROM golang:1.24-alpine
+FROM golang:1.25-alpine
 
 # Copy the Air binary and the application source code from the builder stage
 COPY --from=builder /go/bin/air /usr/local/bin/air
