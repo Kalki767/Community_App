@@ -112,13 +112,12 @@ func (h *SessionHandler) Logout(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Session ID not found in context"})
 		return
 	}
-
+	
 	parsedID, ok := sessionID.(uuid.UUID)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Session ID in context is not a valid UUID"})
 		return
 	}
-
 	err := h.usecase.Logout(parsedID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
