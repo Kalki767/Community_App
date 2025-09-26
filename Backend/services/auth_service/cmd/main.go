@@ -5,23 +5,27 @@ import (
 	"log"
 	"os"
 	"time"
+
 	// "github.com/joho/godotenv"
 
 	handlers "auth/internal/delivery/http/handlers"
+	"auth/internal/delivery/http/middleware"
 	repository "auth/internal/repository"
 	services "auth/internal/services"
 	usecase "auth/internal/usecase"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	// swagger
 	_ "auth/cmd/docs"
+
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	db "auth/internal/infrastructure/db"
 	cache "auth/internal/infrastructure/cache"
-
+	db "auth/internal/infrastructure/db"
 )
 
 // @title           Authentication Service API
@@ -39,9 +43,9 @@ func main() {
 //     }
 // }
 
-	// if err := godotenv.Load("../.env"); err != nil {
-    //     log.Println("No .env file found, relying on system environment variables")
-    // }
+	if err := godotenv.Load("../.env"); err != nil {
+        log.Println("No .env file found, relying on system environment variables")
+    }
 	ginMode := os.Getenv("GIN_MODE")
 	if ginMode == "" {
 		ginMode = gin.DebugMode
@@ -57,8 +61,8 @@ func main() {
 
 	// --- 2. Component Initialization (from bottom-up) ---
 	// Repositories
-	userRepo := repository.NewUserRepo(database)
-	sessionRepo := repository.NewSessionRepository(database)
+	userRepo := repository.NewUserRepo(database,redis,15*time.Minute)
+	sessionRepo := repository.NewSessionRepository(database,redis,15*time.Minute)
 
 	// Services
 	// TODO: Replace these hardcoded secrets with environment variables in a production setup.
@@ -83,6 +87,11 @@ func main() {
 	}
 	router := http.SetupRouter(routerConfig)
 
+	// Add middleware globally (captures all routes)
+	router.Use(middleware.MetricsMiddleware())
+
+	// Add /metrics endpoint
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	// Add the Swagger endpoint
 	docsUrl := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The URL to your swagger.json
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler, docsUrl))
